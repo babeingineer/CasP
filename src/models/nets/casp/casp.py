@@ -104,7 +104,7 @@ class CasP(Module):
         points1 = (
             points1 * scale_coarse
             + results["fine_cls_biases1"]
-            + results["fine_reg_biases"] * scale_fine
+            # + results["fine_reg_biases"] * scale_fine
         )
         if "scale0" in data and "scale1" in data:
             points0 = points0 * data["scale0"][b_indices]
@@ -178,18 +178,20 @@ class CasP(Module):
         )
 
         results.update(self.fine_cls_matching(x0_cropped, x1_cropped))
-        init = torch.cat(
-            [results["fine_cls_biases0"], results["fine_cls_biases1"]], dim=-1
-        )
-        init = init / self.scales[0] + 0.5
-        results.update(
-            self.fine_reg_matching(
-                x0_cropped, x1_cropped, num_iters=1, init=init
-            )
-        )
+        # init = torch.cat(
+        #     [results["fine_cls_biases0"], results["fine_cls_biases1"]], dim=-1
+        # )
+        # init = init / self.scales[0] + 0.5
+        # results.update(
+        #     self.fine_reg_matching(
+        #         x0_cropped, x1_cropped, num_iters=1, init=init
+        #     )
+        # )
 
         self.update_points(data, results)
-        
+        results["points0"] = results["points0"][:M]
+        results["points1"] = results["points1"][:M]
+        results["scores"] = results["scores"][:M]
         return results
 
     def load_state_dict(self, state_dict: Dict[str, Any]) -> None:
